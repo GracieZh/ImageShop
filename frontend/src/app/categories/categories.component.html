@@ -7,13 +7,6 @@
   </li>
 </ul>
 
-<div *ngIf="selectedCategory">
 
-  <h2>{{selectedCategory.name | uppercase}} Details</h2>
-  <div><span>id: </span>{{selectedCategory.id}}</div>
-  <div>
-    <label for="category-name">Category name: </label>
-    <input id="category-name" [(ngModel)]="selectedCategory.name" placeholder="name">
-  </div>
 
-</div>
+<app-category-detail [category]="selectedCategory"></app-category-detail>
