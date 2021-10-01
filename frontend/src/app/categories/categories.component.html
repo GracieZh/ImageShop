@@ -1,6 +1,19 @@
-<h2>{{category.name | uppercase}} Details</h2>
-<div><span>id: </span>{{category.id}}</div>
-<div>
-  <label for="name">Category name: </label>
-  <input id="name" [(ngModel)]="category.name" placeholder="name">
+<h2>My Categories</h2>
+<ul class="heroes">
+  <li *ngFor="let category of categories"
+    [class.selected]="category === selectedCategory"
+    (click)="onSelect(category)">
+    <span class="badge">{{category.id}}</span> {{category.name}}
+  </li>
+</ul>
+
+<div *ngIf="selectedCategory">
+
+  <h2>{{selectedCategory.name | uppercase}} Details</h2>
+  <div><span>id: </span>{{selectedCategory.id}}</div>
+  <div>
+    <label for="category-name">Category name: </label>
+    <input id="category-name" [(ngModel)]="selectedCategory.name" placeholder="name">
+  </div>
+
 </div>
