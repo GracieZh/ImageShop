@@ -227,9 +227,9 @@ func deleteCategory(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Access-Control-Allow-Headers", "*")  
   params := mux.Vars(r)  
 
-  fmt.Println("deleteCategory name ", r.FormValue("name"))
+  fmt.Println("deleteCategory name ", params["name"])
 
-  stmt, err := db.Prepare("DELETE FROM categories WHERE name = ?"+r.FormValue("name"))
+  stmt, err := db.Prepare("DELETE FROM categories WHERE name = ?")
   if err != nil {
     panic(err.Error())
   }  
