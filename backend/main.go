@@ -29,6 +29,14 @@ type Category struct {
 var db *sql.DB
 var err error
 
+func WrapHandler(f http.Handler) http.HandlerFunc {
+  return func(w http.ResponseWriter, r *http.Request) {
+
+      fmt.Println("http request: ", r.Method, r.URL.Path )
+
+      f.ServeHTTP(w, r)
+  }
+}
 func main() {
 
   fmt.Println("backend starting...")
@@ -44,6 +52,8 @@ func main() {
 
   router := mux.NewRouter()  
   router.HandleFunc("/category", getCategories).Methods("GET")
+  router.HandleFunc("/category/", getCategoryByName).Methods("GET")
+  router.HandleFunc("/category", setOptions).Methods("OPTIONS")
   router.HandleFunc("/category", createCategory).Methods("POST")
   router.HandleFunc("/category/{id}", getCategory).Methods("GET")
   router.HandleFunc("/category/{id}", updateCategory).Methods("PUT")
@@ -51,7 +61,7 @@ func main() {
 
   fmt.Println("backend Listening...\n")
 
-  http.ListenAndServe(":8000", router)
+  http.ListenAndServe(":8000", WrapHandler(router))
 }
 
 func getCategories(w http.ResponseWriter, r *http.Request) {
@@ -76,6 +86,19 @@ func getCategories(w http.ResponseWriter, r *http.Request) {
     categories = append(categories, category)
   }  
   json.NewEncoder(w).Encode(categories)
+}
+
+func setOptions(w http.ResponseWriter, r *http.Request) {
+
+  fmt.Println("setOptions\n")
+
+  w.Header().Set("Content-Type", "application/json")  
+  w.Header().Set("Access-Control-Allow-Origin", "*")  
+  w.Header().Set("Access-Control-Allow-Headers", "*")  
+  w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")  
+  w.Header().Set("Content-Length", "0")  
+
+  fmt.Fprintf(w, " ")
 }
 
 func createCategory(w http.ResponseWriter, r *http.Request) {
@@ -104,7 +127,52 @@ func createCategory(w http.ResponseWriter, r *http.Request) {
     panic(err.Error())
   }
   fmt.Println("New category was created\n")
-    fmt.Fprintf(w, "New category was created")
+  
+  result, err := db.Query("SELECT id, name FROM categories WHERE name = ?", name)
+  if err != nil {
+    panic(err.Error())
+  }  
+  defer result.Close()  
+  var category Category  
+  for result.Next() {
+    err := result.Scan(&category.ID, &category.Name)
+    if err != nil {
+      panic(err.Error())
+    }
+  }  
+  json.NewEncoder(w).Encode(category)
+
+}
+
+func getCategoryByName(w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Content-Type", "application/json")
+  w.Header().Set("Access-Control-Allow-Origin", "*")  
+  w.Header().Set("Access-Control-Allow-Headers", "*")  
+  params := mux.Vars(r)  
+
+  fmt.Println("getCategoryByName params", params)
+  fmt.Println("getCategoryByName name", params["name"])
+  fmt.Println("getCategoryByName name ", r.FormValue("name"))
+
+  
+
+  result, err := db.Query("SELECT id, name FROM categories WHERE name like '%"+r.FormValue("name")+"%'")
+  if err != nil {
+    panic(err.Error())
+  }  
+  defer result.Close()  
+  var categories []Category
+  var category Category  
+  for result.Next() {
+    err := result.Scan(&category.ID, &category.Name)
+    fmt.Println("getCategoryByName,",category.Name)
+    if err != nil {
+      panic(err.Error())
+    }
+    categories = append(categories, category)
+  }  
+  fmt.Println("getCategoryByName2")
+  json.NewEncoder(w).Encode(categories)
 }
 
 func getCategory(w http.ResponseWriter, r *http.Request) {
