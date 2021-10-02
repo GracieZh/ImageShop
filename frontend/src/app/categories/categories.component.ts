@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+
 import { Category } from '../category';
-//import { CATEGORIES } from '../mock-categories';
 import { CategoryService } from '../category.service';
-import { MessageService } from '../message.service';
 
 @Component({
   selector: 'app-categories',
@@ -10,23 +9,31 @@ import { MessageService } from '../message.service';
   styleUrls: ['./categories.component.scss']
 })
 export class CategoriesComponent implements OnInit {
-  //categories = CATEGORIES;
-  selectedCategory?: Category;
   categories: Category[] = [];
 
-  constructor(private categoryService: CategoryService, private messageService: MessageService) { }
+  constructor(private categoryService: CategoryService) { }
 
   ngOnInit() {
     this.getCategories();
   }
 
-  onSelect(category: Category): void {
-    this.selectedCategory = category;
-    this.messageService.add(`CategoriesComponent: Selected hero id=${category.id}`);
-  }
-
   getCategories(): void {
     this.categoryService.getCategories()
-        .subscribe(categories => this.categories = categories);
+    .subscribe(categories => this.categories = categories);
   }
+
+  add(name: string): void {
+    name = name.trim();
+    if (!name) { return; }
+    this.categoryService.addCategory({ name } as Category)
+      .subscribe(category => {
+        this.categories.push(category);
+      });
+  }
+
+  delete(category: Category): void {
+    this.categories = this.categories.filter(h => h !== category);
+    this.categoryService.deleteCategory(category.id).subscribe();
+  }
+
 }
