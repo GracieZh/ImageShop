@@ -114,11 +114,10 @@ export class CategoryService {
   }
 
   /** DELETE: delete the category from the server */
-  deleteCategory(id: number): Observable<Category> {
-    const url = `${this.categoriesUrl}/${id}`;
-
+  deleteCategory(name: string): Observable<Category> {
+    const url = `${this.categoriesUrl}/${name}`;
     return this.http.delete<Category>(url, this.httpOptions).pipe(
-      tap(_ => this.log(`deleted category id=${id}`)),
+      tap(_ => this.log(`deleted category name=${name}`)),
       catchError(this.handleError<Category>('deleteCategory'))
     );
   }

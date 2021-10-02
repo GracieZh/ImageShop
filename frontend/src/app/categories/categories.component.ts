@@ -33,7 +33,7 @@ export class CategoriesComponent implements OnInit {
 
   delete(category: Category): void {
     this.categories = this.categories.filter(h => h !== category);
-    this.categoryService.deleteCategory(category.id).subscribe();
+    this.categoryService.deleteCategory(category.name).subscribe();
   }
 
 }

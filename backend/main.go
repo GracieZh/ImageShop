@@ -57,7 +57,8 @@ func main() {
   router.HandleFunc("/category", createCategory).Methods("POST")
   router.HandleFunc("/category/{id}", getCategory).Methods("GET")
   router.HandleFunc("/category/{id}", updateCategory).Methods("PUT")
-  router.HandleFunc("/category/{id}", deleteCategory).Methods("DELETE")  
+  router.HandleFunc("/category/{name}", deleteCategory).Methods("DELETE")  
+  router.HandleFunc("/category/{name}", setOptions).Methods("OPTIONS")  
 
   fmt.Println("backend Listening...\n")
 
@@ -219,17 +220,22 @@ func updateCategory(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteCategory(w http.ResponseWriter, r *http.Request) {
+
+  fmt.Println("deleteCategory")
   w.Header().Set("Content-Type", "application/json")
   w.Header().Set("Access-Control-Allow-Origin", "*")  
   w.Header().Set("Access-Control-Allow-Headers", "*")  
   params := mux.Vars(r)  
-  stmt, err := db.Prepare("DELETE FROM categories WHERE id = ?")
+
+  fmt.Println("deleteCategory name ", r.FormValue("name"))
+
+  stmt, err := db.Prepare("DELETE FROM categories WHERE name = ?"+r.FormValue("name"))
   if err != nil {
     panic(err.Error())
   }  
-  _, err = stmt.Exec(params["id"])
+  _, err = stmt.Exec(params["name"])
   if err != nil {
     panic(err.Error())
   }  
-  fmt.Fprintf(w, "Category with ID = %s was deleted", params["id"])
+  json.NewEncoder(w).Encode("Deleted")
 }
